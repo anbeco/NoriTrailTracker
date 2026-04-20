@@ -530,8 +530,18 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="trailhead">Trailhead / Parking Area</label>
+                    <input type="text" id="trailhead" placeholder="Optional - where you park to access this trail">
+                </div>
+                
+                <div class="form-group">
                     <label for="address">Trailhead Address</label>
                     <input type="text" id="address" placeholder="Optional - for easy Google Maps access">
+                </div>
+                
+                <div class="form-group">
+                    <label for="trailLength">Trail Length (miles)</label>
+                    <input type="number" id="trailLength" step="0.1" placeholder="Optional - total trail length">
                 </div>
                 
                 <div class="form-group">
@@ -557,6 +567,10 @@
                 <div class="form-group">
                     <label>Trail Attributes</label>
                     <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="dogsAllowed" checked>
+                            <label for="dogsAllowed" style="margin: 0; font-weight: 600; color: var(--pine);">Dogs Allowed</label>
+                        </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="offLeash">
                             <label for="offLeash" style="margin: 0;">Off-Leash Allowed</label>
@@ -604,9 +618,12 @@
             const trail = {
                 id: editingId || Date.now(),
                 name: document.getElementById('trailName').value,
+                trailhead: document.getElementById('trailhead').value,
                 address: document.getElementById('address').value,
+                trailLength: document.getElementById('trailLength').value ? parseFloat(document.getElementById('trailLength').value) : null,
                 distance: parseFloat(document.getElementById('distance').value),
                 direction: document.getElementById('direction').value,
+                dogsAllowed: document.getElementById('dogsAllowed').checked,
                 offLeash: document.getElementById('offLeash').checked,
                 hiking: document.getElementById('hiking').checked,
                 biking: document.getElementById('biking').checked
@@ -643,9 +660,12 @@
             
             editingId = id;
             document.getElementById('trailName').value = trail.name;
+            document.getElementById('trailhead').value = trail.trailhead || '';
             document.getElementById('address').value = trail.address || '';
+            document.getElementById('trailLength').value = trail.trailLength || '';
             document.getElementById('distance').value = trail.distance;
             document.getElementById('direction').value = trail.direction;
+            document.getElementById('dogsAllowed').checked = trail.dogsAllowed !== false;
             document.getElementById('offLeash').checked = trail.offLeash;
             document.getElementById('hiking').checked = trail.hiking;
             document.getElementById('biking').checked = trail.biking;
@@ -709,13 +729,15 @@
             }
             
             listContainer.innerHTML = filtered.map(trail => `
-                <div class="trail-card">
+                <div class="trail-card" style="${trail.dogsAllowed === false ? 'border-left-color: #c44; background: #fff5f5;' : ''}">
                     <div class="trail-header">
                         <div>
                             <div class="trail-name">${trail.name}</div>
+                            ${trail.dogsAllowed === false ? '<div style="color: #c44; font-weight: 700; font-size: 0.95em; margin: 6px 0;">⚠️ NO DOGS ALLOWED</div>' : ''}
+                            ${trail.trailhead ? `<div style="color: var(--forest); font-size: 0.9em; margin-top: 4px;">🅿️ ${trail.trailhead}</div>` : ''}
                             ${trail.address ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trail.address)}" target="_blank" style="color: var(--sky); text-decoration: none; font-size: 0.9em; display: block; margin-top: 6px;">📍 ${trail.address}</a>` : ''}
-                            <div class="tags">
-                                ${trail.offLeash ? '<span class="tag off-leash">Off-Leash</span>' : ''}
+                            <div class="tags" style="margin-top: 8px;">
+                                ${trail.offLeash && trail.dogsAllowed !== false ? '<span class="tag off-leash">Off-Leash</span>' : ''}
                                 ${trail.hiking ? '<span class="tag hiking">Hiking</span>' : ''}
                                 ${trail.biking ? '<span class="tag biking">Mountain Biking</span>' : ''}
                             </div>
@@ -726,8 +748,12 @@
                         </div>
                     </div>
                     <div class="trail-details">
+                        ${trail.trailLength ? `<div class="detail-item">
+                            <span class="detail-label">Trail Length:</span>
+                            <span>${trail.trailLength} mi</span>
+                        </div>` : ''}
                         <div class="detail-item">
-                            <span class="detail-label">Distance:</span>
+                            <span class="detail-label">From Home:</span>
                             <span>${trail.distance} mi</span>
                         </div>
                         <div class="detail-item">
